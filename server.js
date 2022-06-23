@@ -13,7 +13,30 @@ app.use(express.static(path.resolve("public")))
 
 
 
-venom
+function start(client) {
+  //mysql.sync()
+  client.onMessage( async (message)  => {
+    if (message.isGroupMsg === false && message.from === "558183335066@c.us") {
+        try {
+            const reponse = await menssageController.handleResponse(message)
+            reponse.forEach(response => {
+            client.sendText(message.from, response)
+            });
+            console.log("feito")
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+  });
+}
+
+app.use("/qrcode" , (req, res) => {
+  res.sendFile(path.resolve("public" , "out.png"))
+ })
+
+app.use("/" , (req, res) => {
+  venom
 .create(
   'sessionName',
   (base64Qr, asciiQR, attempts, urlCode) => {
@@ -50,33 +73,9 @@ venom
 });
 
 
-
-function start(client) {
-  //mysql.sync()
-  client.onMessage( async (message)  => {
-    if (message.isGroupMsg === false && message.from === "558183335066@c.us") {
-        try {
-            const reponse = await menssageController.handleResponse(message)
-            reponse.forEach(response => {
-            client.sendText(message.from, response)
-            });
-            console.log("feito")
-        }
-        catch (err) {
-            console.log(err)
-        }
-    }
-  });
-}
-
-app.use("/qrcode" , (req, res) => {
-  res.sendFile(path.resolve("public" , "out.png"))
- })
-
-app.use("/" , (req, res) => {
-  res.sendFile(path.resolve("public" , "index.html"))
+res.sendFile(path.resolve("public" , "index.html"))
  })
 
  
 
-server.listen(process.env.PORT)
+server.listen(3000)
