@@ -1,16 +1,55 @@
 const venom = require('venom-bot');
 const menssageController = require("./controllers/messageController")
 const mysql = require("./database/instances/mysql")
+const fs = require('fs');
+const express = require("express")
+const http = require("http")
+const path = require("path")
+
+const app = express()
+const server = http.createServer(app)
+
+app.use(express.static(path.resolve("public")))
+
+
 
 venom
-  .create({
-    session: 'session-name', //name of session
-    multidevice: true // for version not multidevice use false.(default: true)
-  })
-  .then((client) => start(client))
-  .catch((erro) => {
-    console.log(erro);
-  });
+.create(
+  'sessionName',
+  (base64Qr, asciiQR, attempts, urlCode) => {
+    console.log(asciiQR); // Optional to log the QR in the terminal
+    var matches = base64Qr.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
+      response = {};
+
+    if (matches.length !== 3) {
+      return new Error('Invalid input string');
+    }
+    response.type = matches[1];
+    response.data = new Buffer.from(matches[2], 'base64');
+
+    var imageBuffer = response;
+    require('fs').writeFile(
+      './public/out.png',
+      imageBuffer['data'],
+      'binary',
+      function (err) {
+        if (err != null) {
+          console.log(err);
+        }
+      }
+    );
+  },
+  undefined,
+  { logQR: false }
+)
+.then((client) => {
+  start(client);
+})
+.catch((erro) => {
+  console.log(erro);
+});
+
+
 
 function start(client) {
   //mysql.sync()
@@ -29,3 +68,15 @@ function start(client) {
     }
   });
 }
+
+app.use("/qrcode" , (req, res) => {
+  res.sendFile(path.resolve("public" , "out.png"))
+ })
+
+app.use("/" , (req, res) => {
+  res.sendFile(path.resolve("public" , "index.html"))
+ })
+
+ 
+
+server.listen(3000)
