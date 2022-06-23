@@ -11,26 +11,7 @@ const server = http.createServer(app)
 
 app.use(express.static(path.resolve("public")))
 
-try {
-  fs.unlink('./public/out.png', function (err){
-    if (err) {
-      console.error(err)
-    }
-    console.log('Arquivo deletado!');
-  })
-  
-  fs.rm("./tokens", { recursive: true }, (err) => { 
-    if (err) { 
-      console.error(err); 
-    } 
-    else { 
-      console.log("Recursive: Directory Deleted!"); 
-    } 
-  })
-}
-catch (err) {
-  console.log("Inicialização Limpa")
-}
+
 
 venom
 .create(
@@ -59,10 +40,7 @@ venom
     );
   },
   undefined,
-  { logQR: false,
-    multidevice: true,
-    handless: false,
-  }
+  { logQR: false }
 )
 .then((client) => {
   start(client);
