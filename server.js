@@ -61,7 +61,7 @@ venom
   undefined,
   { logQR: false,
     multidevice: true,
-    handless: true,
+    handless: false,
   }
 )
 .then((client) => {
