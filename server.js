@@ -11,32 +11,28 @@ const server = http.createServer(app)
 
 app.use(express.static(path.resolve("public")))
 
-
-
-function start(client) {
-  //mysql.sync()
-  client.onMessage( async (message)  => {
-    if (message.isGroupMsg === false && message.from === "558183335066@c.us") {
-        try {
-            const reponse = await menssageController.handleResponse(message)
-            reponse.forEach(response => {
-            client.sendText(message.from, response)
-            });
-            console.log("feito")
-        }
-        catch (err) {
-            console.log(err)
-        }
+try {
+  fs.unlink('./public/out.png', function (err){
+    if (err) {
+      console.error(err)
     }
-  });
+    console.log('Arquivo deletado!');
+  })
+  
+  fs.rm("./tokens", { recursive: true }, (err) => { 
+    if (err) { 
+      console.error(err); 
+    } 
+    else { 
+      console.log("Recursive: Directory Deleted!"); 
+    } 
+  })
+}
+catch (err) {
+  console.log("Inicialização Limpa")
 }
 
-app.use("/qrcode" , (req, res) => {
-  res.sendFile(path.resolve("public" , "out.png"))
- })
-
-app.use("/" , (req, res) => {
-  venom
+venom
 .create(
   'sessionName',
   (base64Qr, asciiQR, attempts, urlCode) => {
@@ -63,7 +59,10 @@ app.use("/" , (req, res) => {
     );
   },
   undefined,
-  { logQR: false }
+  { logQR: false,
+    multidevice: true,
+    handless: true,
+  }
 )
 .then((client) => {
   start(client);
@@ -73,7 +72,31 @@ app.use("/" , (req, res) => {
 });
 
 
-res.sendFile(path.resolve("public" , "index.html"))
+
+function start(client) {
+  //mysql.sync()
+  client.onMessage( async (message)  => {
+    if (message.isGroupMsg === false && message.from === "558183335066@c.us") {
+        try {
+            const reponse = await menssageController.handleResponse(message)
+            reponse.forEach(response => {
+            client.sendText(message.from, response)
+            });
+            console.log("feito")
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+  });
+}
+
+app.use("/qrcode" , (req, res) => {
+  res.sendFile(path.resolve("public" , "out.png"))
+ })
+
+app.use("/" , (req, res) => {
+  res.sendFile(path.resolve("public" , "index.html"))
  })
 
  
